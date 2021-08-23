@@ -4,7 +4,7 @@
 # to deploy: run `terraform apply`
 
 variable "aws_region" {
-  default = "us-west-2"
+  default = "sa-east-1"
 }
 
 provider "aws" {
