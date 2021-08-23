@@ -46,6 +46,29 @@ resource "aws_iam_role" "iam_for_lambda" {
       },
     ]
   })
+
+  managed_policy_arns = [aws_iam_policy.s3_iam_bucket_policy.arn]
+}
+
+resource "aws_iam_policy" "s3_iam_bucket_policy" {
+  name = "s3_iam_bucket_policy"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "s3:Get*",
+          "s3:List*",
+          "s3:PutObject"]
+        Principal = {
+          Service: "lambda.amazonaws.com"
+        },
+        Effect = "Allow"
+        Resource = "arn:aws:s3:::vini-images-example/*"
+      },
+    ]
+  })
 }
 
 resource "aws_lambda_permission" "allow_bucket" {
