@@ -11,6 +11,11 @@ variable "s3_bucket_images" {
   default = "vini-images-example"
 }
 
+variable "ses_subscription_email" {
+  default = ""
+  type = string
+}
+
 provider "aws" {
   region = var.aws_region
 }
@@ -54,7 +59,11 @@ resource "aws_iam_role" "iam_for_lambda" {
     ]
   })
 
-  managed_policy_arns = [aws_iam_policy.s3_iam_bucket_policy.arn, data.aws_iam_policy.AWSLambdaBasicExecutionRole.arn]
+  managed_policy_arns = [
+    aws_iam_policy.s3_iam_bucket_policy.arn,
+    data.aws_iam_policy.AWSLambdaBasicExecutionRole.arn,
+    aws_iam_policy.sns_iam_topic_policy.arn
+  ]
 }
 
 resource "aws_iam_policy" "s3_iam_bucket_policy" {
@@ -71,6 +80,23 @@ resource "aws_iam_policy" "s3_iam_bucket_policy" {
         ]
         Effect = "Allow"
         Resource = "arn:aws:s3:::${var.s3_bucket_images}/*"
+      },
+    ]
+  })
+}
+
+resource "aws_iam_policy" "sns_iam_topic_policy" {
+  name = "sns_iam_topic_policy"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "sns:Publish"
+        ]
+        Effect = "Allow"
+        Resource = aws_sns_topic.thumbnails.arn
       },
     ]
   })
@@ -97,6 +123,11 @@ resource "aws_lambda_function" "aws_lambda_s3_thumbnail" {
   runtime = "nodejs14.x"
   timeout = 60
   memory_size = 1024
+  environment {
+    variables = {
+      SNS_THUMBNAILS_TOPIC_ARN = aws_sns_topic.thumbnails.arn
+    }
+  }
 }
 
 resource "aws_s3_bucket" "vini-images-example" {
@@ -115,14 +146,6 @@ resource "aws_s3_bucket_notification" "bucket_notification_png" {
     filter_suffix = ".png"
   }
 
-  depends_on = [
-    aws_lambda_permission.allow_bucket
-  ]
-}
-
-resource "aws_s3_bucket_notification" "bucket_notification_jpg" {
-  bucket = aws_s3_bucket.vini-images-example.id
-
   lambda_function {
     lambda_function_arn = aws_lambda_function.aws_lambda_s3_thumbnail.arn
     events = [
@@ -135,4 +158,14 @@ resource "aws_s3_bucket_notification" "bucket_notification_jpg" {
   depends_on = [
     aws_lambda_permission.allow_bucket
   ]
+}
+
+resource "aws_sns_topic" "thumbnails" {
+  name = "thumbnails-topic"
+}
+
+resource "aws_sns_topic_subscription" "thumbnails_ses_target" {
+  topic_arn = aws_sns_topic.thumbnails.arn
+  protocol  = "email"
+  endpoint  = var.ses_subscription_email // TF_VAR_ses_subscription_arn
 }
