@@ -44,7 +44,8 @@ resource "aws_iam_role" "iam_for_lambda" {
     Statement = [
       {
         Action = [
-          "sts:AssumeRole"]
+          "sts:AssumeRole"
+        ]
         Principal = {
           Service: "lambda.amazonaws.com"
         }
