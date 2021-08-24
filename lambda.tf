@@ -32,7 +32,8 @@ data "archive_file" "lambda_zip" {
     "lambda.tf",
     "LICENSE",
     "README.md",
-    "yarn.lock"]
+    "yarn.lock"
+  ]
 }
 
 resource "aws_iam_role" "iam_for_lambda" {
