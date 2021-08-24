@@ -23,6 +23,7 @@ data "archive_file" "lambda_zip" {
     ".terraform",
     ".terraform.lock.hcl",
     "terraform.tfstate",
+    "terraform.tfstate.backup",
     ".terraform.tfstate.lock.info",
     "lambda.tf",
     "LICENSE",
@@ -47,7 +48,7 @@ resource "aws_iam_role" "iam_for_lambda" {
     ]
   })
 
-  managed_policy_arns = [aws_iam_policy.s3_iam_bucket_policy.arn]
+  managed_policy_arns = [aws_iam_policy.s3_iam_bucket_policy.arn, data.aws_iam_policy.AWSLambdaBasicExecutionRole.arn]
 }
 
 resource "aws_iam_policy" "s3_iam_bucket_policy" {
@@ -60,15 +61,17 @@ resource "aws_iam_policy" "s3_iam_bucket_policy" {
         Action = [
           "s3:Get*",
           "s3:List*",
-          "s3:PutObject"]
-        Principal = {
-          Service: "lambda.amazonaws.com"
-        },
+          "s3:PutObject"
+        ]
         Effect = "Allow"
         Resource = "arn:aws:s3:::vini-images-example/*"
       },
     ]
   })
+}
+
+data "aws_iam_policy" "AWSLambdaBasicExecutionRole" {
+  arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
 resource "aws_lambda_permission" "allow_bucket" {
@@ -86,6 +89,8 @@ resource "aws_lambda_function" "aws_lambda_s3_thumbnail" {
   handler = "app.handler"
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
   runtime = "nodejs14.x"
+  timeout = 60
+  memory_size = 1024
 }
 
 resource "aws_s3_bucket" "vini-images-example" {
@@ -98,26 +103,14 @@ resource "aws_s3_bucket_notification" "bucket_notification_png" {
   lambda_function {
     lambda_function_arn = aws_lambda_function.aws_lambda_s3_thumbnail.arn
     events = [
-      "s3:ObjectCreated:*"]
+      "s3:ObjectCreated:*"
+    ]
     filter_prefix = "images/"
     filter_suffix = ".png"
   }
 
   depends_on = [
-    aws_lambda_permission.allow_bucket]
+    aws_lambda_permission.allow_bucket
+  ]
 }
 
-resource "aws_s3_bucket_notification" "bucket_notification_jpg" {
-  bucket = aws_s3_bucket.vini-images-example.id
-
-  lambda_function {
-    lambda_function_arn = aws_lambda_function.aws_lambda_s3_thumbnail.arn
-    events = [
-      "s3:ObjectCreated:*"]
-    filter_prefix = "images/"
-    filter_suffix = ".jpg"
-  }
-
-  depends_on = [
-    aws_lambda_permission.allow_bucket]
-}
