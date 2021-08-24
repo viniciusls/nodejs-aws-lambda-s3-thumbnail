@@ -7,6 +7,10 @@ variable "aws_region" {
   default = "sa-east-1"
 }
 
+variable "s3_bucket_images" {
+  default = "vini-images-example"
+}
+
 provider "aws" {
   region = var.aws_region
 }
@@ -64,7 +68,7 @@ resource "aws_iam_policy" "s3_iam_bucket_policy" {
           "s3:PutObject"
         ]
         Effect = "Allow"
-        Resource = "arn:aws:s3:::vini-images-example/*"
+        Resource = "arn:aws:s3:::${var.s3_bucket_images}/*"
       },
     ]
   })
@@ -94,7 +98,7 @@ resource "aws_lambda_function" "aws_lambda_s3_thumbnail" {
 }
 
 resource "aws_s3_bucket" "vini-images-example" {
-  bucket = "vini-images-example"
+  bucket = var.s3_bucket_images
 }
 
 resource "aws_s3_bucket_notification" "bucket_notification_png" {
