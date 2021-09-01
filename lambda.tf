@@ -5,7 +5,7 @@
 
 terraform {
   backend "s3" {
-    bucket = "terraform"
+    bucket = "viniciusls-terraform"
     key    = "nodejs-aws-lambda-s3-thumbnail"
     region = "sa-east-1"
   }
