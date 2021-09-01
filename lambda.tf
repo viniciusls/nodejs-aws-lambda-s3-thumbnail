@@ -1,33 +1,3 @@
-# Simple AWS Lambda Terraform Example
-# requires 'index.js' in the same directory
-# to test: run `terraform plan`
-# to deploy: run `terraform apply`
-
-terraform {
-  backend "s3" {
-    bucket = "viniciusls-terraform"
-    key    = "nodejs-aws-lambda-s3-thumbnail"
-    region = "sa-east-1"
-  }
-}
-
-variable "aws_region" {
-  default = "sa-east-1"
-}
-
-variable "s3_bucket_images" {
-  default = "vini-images-example"
-}
-
-variable "ses_subscription_email" {
-  default = ""
-  type = string
-}
-
-provider "aws" {
-  region = var.aws_region
-}
-
 data "archive_file" "lambda_zip" {
   type = "zip"
   source_dir = path.module
@@ -136,44 +106,4 @@ resource "aws_lambda_function" "aws_lambda_s3_thumbnail" {
       SNS_THUMBNAILS_TOPIC_ARN = aws_sns_topic.thumbnails.arn
     }
   }
-}
-
-resource "aws_s3_bucket" "vini-images-example" {
-  bucket = var.s3_bucket_images
-}
-
-resource "aws_s3_bucket_notification" "bucket_notification_png" {
-  bucket = aws_s3_bucket.vini-images-example.id
-
-  lambda_function {
-    lambda_function_arn = aws_lambda_function.aws_lambda_s3_thumbnail.arn
-    events = [
-      "s3:ObjectCreated:*"
-    ]
-    filter_prefix = "images/"
-    filter_suffix = ".png"
-  }
-
-  lambda_function {
-    lambda_function_arn = aws_lambda_function.aws_lambda_s3_thumbnail.arn
-    events = [
-      "s3:ObjectCreated:*"
-    ]
-    filter_prefix = "images/"
-    filter_suffix = ".jpg"
-  }
-
-  depends_on = [
-    aws_lambda_permission.allow_bucket
-  ]
-}
-
-resource "aws_sns_topic" "thumbnails" {
-  name = "thumbnails-topic"
-}
-
-resource "aws_sns_topic_subscription" "thumbnails_ses_target" {
-  topic_arn = aws_sns_topic.thumbnails.arn
-  protocol  = "email"
-  endpoint  = var.ses_subscription_email // TF_VAR_ses_subscription_arn
 }
