@@ -5,7 +5,7 @@ resource "aws_api_gateway_integration_response" "item_put_method-integration_res
 
   status_code = aws_api_gateway_method_response.item_put_method_200_response.status_code
 
-  response_templates {
+  response_templates = {
     "application/json" = ""
   }
 
@@ -21,7 +21,7 @@ resource "aws_api_gateway_integration_response" "item_get_method-integration_res
 
   status_code = aws_api_gateway_method_response.item_get_method_200_response.status_code
 
-  response_templates {
+  response_templates = {
     "application/json" = ""
   }
 
@@ -42,7 +42,7 @@ resource "aws_api_gateway_integration_response" "item_options_method-integration
     "method.response.header.Access-Control-Allow-Origin"  = "'*'"
   }
 
-  response_templates {
+  response_templates = {
     "application/json" = ""
   }
 

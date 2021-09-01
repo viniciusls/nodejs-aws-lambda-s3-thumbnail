@@ -5,10 +5,10 @@ resource "aws_iam_role" "s3_proxy_role" {
 }
 
 data "aws_iam_policy_document" "s3_proxy_policy" {
-  statement {
+  statement = {
     actions = ["sts:AssumeRole"]
 
-    principals {
+    principals = {
       type        = "Service"
       identifiers = ["apigateway.amazonaws.com"]
     }
@@ -17,7 +17,7 @@ data "aws_iam_policy_document" "s3_proxy_policy" {
 
 resource "aws_iam_role_policy_attachment" "s3_proxy_role_file_upload_attachment" {
   depends_on = [
-    "aws_iam_policy.s3_file_upload_policy",
+    aws_iam_policy.s3_file_upload_policy,
   ]
 
   role       = aws_iam_role.s3_proxy_role.name
@@ -26,7 +26,7 @@ resource "aws_iam_role_policy_attachment" "s3_proxy_role_file_upload_attachment"
 
 resource "aws_iam_role_policy_attachment" "s3_proxy_role_api_gateway_attachment" {
   depends_on = [
-    "aws_iam_policy.s3_file_upload_policy",
+    aws_iam_policy.s3_file_upload_policy,
   ]
 
   role       = aws_iam_role.s3_proxy_role.name
@@ -34,16 +34,16 @@ resource "aws_iam_role_policy_attachment" "s3_proxy_role_api_gateway_attachment"
 }
 
 resource "aws_s3_bucket" "file_upload_bucket" {
-  bucket = "file-upload-bucket-${var.environment}"
+  bucket = "nodejs-aws-lambda-s3-${var.environment}"
   acl    = "private"
 
-  tags {
-    Name        = "file-upload-bucket-${var.environment}"
+  tags = {
+    Name        = "nodejs-aws-lambda-s3-${var.environment}"
     Environment = var.environment
   }
 
   depends_on = [
-    "aws_iam_policy.s3_file_upload_policy",
+    aws_iam_policy.s3_file_upload_policy,
   ]
 }
 
@@ -52,21 +52,17 @@ resource "aws_iam_policy" "s3_file_upload_policy" {
   path        = "/"
   description = "${var.environment} s3 file upload policy"
 
-  policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": [
-                "s3:PutObject",
-                "s3:GetObject"
-            ],
-      "Effect": "Allow",
-      "Resource": [
-                "arn:aws:s3:::file-upload-bucket-${var.environment}/*"
-            ]
-    }
-  ]
-}
-EOF
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject"
+        ]
+        Effect = "Allow"
+        Resource = "arn:aws:s3:::nodejs-aws-lambda-s3-${var.environment}/*"
+      },
+    ]
+  })
 }

@@ -4,7 +4,7 @@ resource "aws_api_gateway_method_response" "item_put_method_200_response" {
   http_method = aws_api_gateway_method.item_put_method.http_method
   status_code = "200"
 
-  response_models {
+  response_models = {
     "application/json" = "Empty"
   }
 
@@ -21,11 +21,11 @@ resource "aws_api_gateway_method_response" "item_options_method_200_response" {
   http_method = aws_api_gateway_method.item_options_method.http_method
   status_code = "200"
 
-  response_models {
+  response_models = {
     "application/json" = "Empty"
   }
 
-  response_parameters {
+  response_parameters = {
     "method.response.header.Access-Control-Allow-Headers" = true
     "method.response.header.Access-Control-Allow-Methods" = true
     "method.response.header.Access-Control-Allow-Origin" = true
@@ -40,7 +40,7 @@ resource "aws_api_gateway_method_response" "item_get_method_200_response" {
   http_method = aws_api_gateway_method.item_get_method.http_method
   status_code = "200"
 
-  response_models {
+  response_models = {
     "application/json" = "Empty"
   }
 
