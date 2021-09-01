@@ -3,6 +3,14 @@
 # to test: run `terraform plan`
 # to deploy: run `terraform apply`
 
+terraform {
+  backend "s3" {
+    bucket = "terraform"
+    key    = "nodejs-aws-lambda-s3-thumbnail"
+    region = "sa-east-1"
+  }
+}
+
 variable "aws_region" {
   default = "sa-east-1"
 }
