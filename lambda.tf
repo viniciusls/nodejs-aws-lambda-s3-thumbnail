@@ -38,46 +38,10 @@ resource "aws_iam_role" "iam_for_lambda" {
   })
 
   managed_policy_arns = [
-    aws_iam_policy.s3_iam_bucket_policy.arn,
+    aws_iam_policy.s3_file_upload_policy.arn,
     data.aws_iam_policy.AWSLambdaBasicExecutionRole.arn,
     aws_iam_policy.sns_iam_topic_policy.arn
   ]
-}
-
-resource "aws_iam_policy" "s3_iam_bucket_policy" {
-  name = "s3_iam_bucket_policy"
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = [
-          "s3:Get*",
-          "s3:List*",
-          "s3:PutObject"
-        ]
-        Effect = "Allow"
-        Resource = "arn:aws:s3:::${var.s3_bucket_images}/*"
-      },
-    ]
-  })
-}
-
-resource "aws_iam_policy" "sns_iam_topic_policy" {
-  name = "sns_iam_topic_policy"
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = [
-          "sns:Publish"
-        ]
-        Effect = "Allow"
-        Resource = aws_sns_topic.thumbnails.arn
-      },
-    ]
-  })
 }
 
 data "aws_iam_policy" "AWSLambdaBasicExecutionRole" {
@@ -89,7 +53,7 @@ resource "aws_lambda_permission" "allow_bucket" {
   action = "lambda:InvokeFunction"
   function_name = aws_lambda_function.aws_lambda_s3_thumbnail.arn
   principal = "s3.amazonaws.com"
-  source_arn = aws_s3_bucket.vini-images-example.arn
+  source_arn = aws_s3_bucket.file_upload_bucket.arn
 }
 
 resource "aws_lambda_function" "aws_lambda_s3_thumbnail" {
