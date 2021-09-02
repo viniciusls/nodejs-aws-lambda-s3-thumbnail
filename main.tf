@@ -3,14 +3,6 @@
 # to test: run `terraform plan`
 # to deploy: run `terraform apply`
 
-variable "aws_region" {
-  default = "sa-east-1"
-}
-
-variable "environment" {
-  default = "dev"
-}
-
 terraform {
   backend "s3" {
     bucket = "viniciusls-terraform"
@@ -20,12 +12,12 @@ terraform {
 }
 
 provider "aws" {
-  region = var.aws_region
+  region = var.region
 }
 
-module "s3-proxy-gateway" {
+/*module "s3-proxy-gateway" {
   source      = "./s3-proxy-gateway"
   environment = var.environment
-  region      = var.aws_region
-}
+  region      = var.region
+} - DISABLED - TBD */
 
