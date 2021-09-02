@@ -20,7 +20,7 @@ resource "aws_api_gateway_usage_plan" "s3_proxy_usage_plan" {
   name        = "s3_proxy_usage_plan-nodejs-lambda-${var.environment}"
   description = "usage plan for s3 proxy"
 
-  api_stages = {
+  api_stages {
     api_id = aws_api_gateway_rest_api.api_gateway.id
     stage  = aws_api_gateway_deployment.s3_proxy_api_deployment.stage_name
   }
@@ -28,11 +28,6 @@ resource "aws_api_gateway_usage_plan" "s3_proxy_usage_plan" {
 
 resource "aws_api_gateway_api_key" "s3_api_key" {
   name = "s3-proxy-nodejs-lambda-apikey-${var.environment}"
-
-  stage_key = {
-    rest_api_id = aws_api_gateway_rest_api.api_gateway.id
-    stage_name  = aws_api_gateway_deployment.s3_proxy_api_deployment.stage_name
-  }
 }
 
 resource "aws_api_gateway_usage_plan_key" "s3_proxy_usage_plan-key" {

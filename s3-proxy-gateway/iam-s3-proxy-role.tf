@@ -5,10 +5,10 @@ resource "aws_iam_role" "s3_proxy_role" {
 }
 
 data "aws_iam_policy_document" "s3_proxy_policy" {
-  statement = {
+  statement {
     actions = ["sts:AssumeRole"]
 
-    principals = {
+    principals {
       type        = "Service"
       identifiers = ["apigateway.amazonaws.com"]
     }

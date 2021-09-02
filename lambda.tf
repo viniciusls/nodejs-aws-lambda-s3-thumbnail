@@ -101,7 +101,7 @@ resource "aws_lambda_function" "aws_lambda_s3_thumbnail" {
   runtime = "nodejs14.x"
   timeout = 60
   memory_size = 1024
-  environment = {
+  environment {
     variables = {
       SNS_THUMBNAILS_TOPIC_ARN = aws_sns_topic.thumbnails.arn
     }
