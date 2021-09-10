@@ -6,7 +6,7 @@ resource "aws_api_gateway_stage" "api_stage" {
 
 resource "aws_api_gateway_method_settings" "api_stage_method_settings_all" {
   rest_api_id = aws_api_gateway_rest_api.api_gateway.id
-  stage_name  = aws_api_gateway_stage.dev.stage_name
+  stage_name  = var.environment
   method_path = "*/*"
 
   settings {
