@@ -1,10 +1,10 @@
-resource "aws_api_gateway_stage" "dev" {
+resource "aws_api_gateway_stage" "api_stage" {
   deployment_id = aws_api_gateway_deployment.s3_proxy_api_deployment.id
   rest_api_id   = aws_api_gateway_rest_api.api_gateway.id
-  stage_name    = "dev"
+  stage_name    = var.environment
 }
 
-resource "aws_api_gateway_method_settings" "dev_all" {
+resource "aws_api_gateway_method_settings" "api_stage_method_settings_all" {
   rest_api_id = aws_api_gateway_rest_api.api_gateway.id
   stage_name  = aws_api_gateway_stage.dev.stage_name
   method_path = "*/*"
